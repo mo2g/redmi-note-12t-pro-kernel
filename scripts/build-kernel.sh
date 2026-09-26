@@ -85,6 +85,14 @@ else
   make -C "$SRC" O="$OUT" ARCH=arm64 LLVM=1 LLVM_IAS=1 -j"$JOBS"
 fi
 
+# Building only Image.gz does not run the module post-processing step, so
+# Module.symvers is not created. vmlinux.symvers contains the kernel-exported
+# symbol CRCs and is sufficient for the vendor module compatibility check.
+if [ ! -f "$OUT/Module.symvers" ] && [ -f "$OUT/vmlinux.symvers" ]; then
+  cp "$OUT/vmlinux.symvers" "$OUT/Module.symvers"
+  echo "info: created $OUT/Module.symvers from vmlinux.symvers (image-only build)"
+fi
+
 echo
 echo "built: $OUT/arch/arm64/boot/Image (and Image.gz when TARGET=Image.gz)"
 echo "verify: $REPO_DIR/tools/check_kernel.sh $OUT/arch/arm64/boot/Image"

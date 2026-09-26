@@ -160,8 +160,9 @@ magiskboot cpio ramdisk.cpio ls | grep -E 'overlay.d|\.backup'
 ## Release / CI build
 
 `scripts/build-kernel.sh` 默认只构建 `Image.gz`（`TARGET=Image.gz`），这样在 CI
-里可以避免构建全部 in-tree 模块，节省时间和磁盘。`Image.gz` 目标的依赖
-`vmlinux` 会同时生成 `Module.symvers`，用于 vendor 模块 CRC 校验。
+里可以避免构建全部 in-tree 模块，节省时间和磁盘。只构建镜像时，内核会生成
+`vmlinux.symvers`（内核导出符号 CRC），但不会生成 `Module.symvers`；脚本会自动
+把 `vmlinux.symvers` 复制为 `Module.symvers`，用于 vendor 模块 CRC 校验。
 
 - 只做 Release / 内核镜像：无需额外设置（默认）。
 - 需要全部内置模块：`TARGET= make ...` 或 `TARGET=all`。
