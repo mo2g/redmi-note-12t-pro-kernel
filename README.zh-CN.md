@@ -90,7 +90,7 @@ tools/check_kernel.sh /path/to/boot.img
 1. 获取官方源码 `pearl-s-oss`，提交 `d96c1a04b701bcf1d39ed1b8ab4b3137ff6490f9`（5.10.136）；
 2. 按顺序应用 `patches/` 下的两个官方 5.10.260 backport；
 3. 使用 `configs/device_kconfig.txt` 作为基线配置；
-4. 用 clang 12 + LLVM/LLD 编译 `Image` / `Image.gz`；
+4. 用 clang 12 + LLVM/LLD 编译 `Image` / `Image.gz`（x86_64 构建机上脚本会自动设置 `CROSS_COMPILE=aarch64-linux-gnu-`）；
 5. 用 `magiskboot` 把新 `Image` 替换进原 boot 镜像，保留 Magisk ramdisk；
 6. 用 `tools/check_kernel.sh` 验证新 boot 镜像，再进行刷入。
 

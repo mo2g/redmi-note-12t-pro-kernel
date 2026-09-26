@@ -88,7 +88,7 @@ See [`docs/build-guide.md`](docs/build-guide.md). High-level steps:
 1. Fetch the official `pearl-s-oss` source at commit `d96c1a04b701bcf1d39ed1b8ab4b3137ff6490f9` (5.10.136).
 2. Apply the two 5.10.260 backports in `patches/` in order.
 3. Use `configs/device_kconfig.txt` as the baseline config.
-4. Build `Image` / `Image.gz` with clang 12 + LLVM/LLD.
+4. Build `Image` / `Image.gz` with clang 12 + LLVM/LLD (on x86_64 hosts, `scripts/build-kernel.sh` sets `CROSS_COMPILE=aarch64-linux-gnu-` automatically).
 5. Replace the kernel in your own Magisk-patched boot image with `magiskboot`; keep the ramdisk.
 6. Verify the new boot image with `tools/check_kernel.sh` before flashing.
 

@@ -27,6 +27,18 @@ LOCALVERSION=${LOCALVERSION:--pearl-cve43499}
 command -v clang >/dev/null || { echo "error: clang not found in PATH"; exit 2; }
 command -v ld.lld >/dev/null || { echo "error: ld.lld not found in PATH"; exit 2; }
 
+# On x86_64/other hosts, clang defaults to the host architecture. Tell the
+# kernel build to target aarch64; on an arm64 host this is not needed.
+HOST_ARCH=$(uname -m)
+case "$HOST_ARCH" in
+  aarch64|arm64) ;;
+  *)
+    export CROSS_COMPILE=${CROSS_COMPILE:-aarch64-linux-gnu-}
+    export CLANG_TRIPLE=${CLANG_TRIPLE:-aarch64-linux-gnu-}
+    echo "info: cross-compiling for arm64 (CROSS_COMPILE=$CROSS_COMPILE)"
+    ;;
+esac
+
 grep -q '^SUBLEVEL = 136' "$SRC/Makefile" || {
   echo "warning: source is not 5.10.136; patch context may differ"
 }

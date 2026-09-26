@@ -166,3 +166,23 @@ magiskboot cpio ramdisk.cpio ls | grep -E 'overlay.d|\.backup'
 - 只做 Release / 内核镜像：无需额外设置（默认）。
 - 需要全部内置模块：`TARGET= make ...` 或 `TARGET=all`。
 - 自动 Release 的完整流程见 [`release-process.md`](release-process.md)。
+
+## x86_64 构建机注意
+
+GitHub Actions 的标准 Linux runner、普通 x86_64 PC 都属于非 arm64 主机。
+直接用 `make` 时，如果没有 `CROSS_COMPILE`，clang 会按 x86_64 编译，最早会在
+`kernel/bounds.s` 报：
+
+```text
+arch/arm64/include/asm/atomic_lse.h:...: error: unknown register name 'x0' in asm
+```
+
+正确做法：
+
+```bash
+make O=out ARCH=arm64 LLVM=1 LLVM_IAS=1 \
+  CROSS_COMPILE=aarch64-linux-gnu- CLANG_TRIPLE=aarch64-linux-gnu- \
+  -j"$(nproc)"
+```
+
+`scripts/build-kernel.sh` 会自动检测主机架构并设置这两个变量；arm64 主机无需设置。
