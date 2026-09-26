@@ -1,0 +1,29 @@
+name: patch-check
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  patches:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch official pearl-s-oss rtmutex.c
+        run: |
+          mkdir -p src/kernel/locking
+          curl -fsSL \
+            "https://raw.githubusercontent.com/MiCode/Xiaomi_Kernel_OpenSource/d96c1a04b701bcf1d39ed1b8ab4b3137ff6490f9/kernel/locking/rtmutex.c" \
+            -o src/kernel/locking/rtmutex.c
+      - name: Verify patch series applies cleanly
+        run: |
+          cd src
+          patch -p1 --dry-run < ../patches/0001-rtmutex-use-waiter-task-in-remove_waiter.patch
+          patch -p1 < ../patches/0001-rtmutex-use-waiter-task-in-remove_waiter.patch
+          patch -p1 --dry-run < ../patches/0002-rtmutex-skip-remove_waiter-when-not-enqueued.patch
+          patch -p1 < ../patches/0002-rtmutex-skip-remove_waiter-when-not-enqueued.patch
+      - name: Verify fixed remove_waiter()
+        run: |
+          cd src
+          grep -q 'waiter_task = waiter->task' kernel/locking/rtmutex.c
+          ! awk '/static void remove_waiter/,/^}/' kernel/locking/rtmutex.c | grep -q current

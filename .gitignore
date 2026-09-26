@@ -1,0 +1,25 @@
+# Private / device-unique data — never commit
+backup/
+device_info.txt
+kernel-build/
+vendor-modules/
+out/
+Module.symvers
+
+# Build artifacts and large binaries
+*.img
+*.tar.gz
+*.tar.xz
+*.ko
+*.log
+*.o
+*.a
+
+# Local tooling
+.DS_Store
+.idea/
+.vscode/
+
+# Python cache
+__pycache__/
+*.pyc
