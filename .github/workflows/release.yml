@@ -17,7 +17,9 @@ permissions:
   contents: write
 
 concurrency:
-  group: release-${{ github.ref }}
+  # Include the commit SHA so a re-tag/new fix can start a fresh run
+  # without waiting for a superseded run of the same tag.
+  group: release-${{ github.ref }}-${{ github.sha }}
   cancel-in-progress: false
 
 jobs:
