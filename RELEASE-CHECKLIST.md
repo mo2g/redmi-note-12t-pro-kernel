@@ -44,7 +44,7 @@ du -ah . | sort -h | tail -n 20
 
 ## GitHub About 建议
 
-- 名称：`pearl-kernel-cve-2026-43499`
+- 名称：`redmi-note-12t-pro-kernel-cve-2026-43499`
 - 描述（中文）：
   `Redmi Note 12T Pro (pearl) MIUI 14 内核 CVE-2026-43499 修复：补丁、编译/验证工具与脱敏重启案例分析。`
 - Description (English):
@@ -56,10 +56,10 @@ du -ah . | sort -h | tail -n 20
 ## 推荐初始化命令
 
 ```bash
-cd pearl-kernel-cve-2026-43499
+cd redmi-note-12t-pro-kernel-cve-2026-43499
 git init -b main
 git add .
 git commit -m "Initial release: CVE-2026-43499 fix for Redmi Note 12T Pro (pearl)"
 # 创建 GitHub 仓库（需已安装并登录 gh）
-gh repo create pearl-kernel-cve-2026-43499 --public --source=. --remote=origin --push
+gh repo create redmi-note-12t-pro-kernel-cve-2026-43499 --public --source=. --remote=origin --push
 ```

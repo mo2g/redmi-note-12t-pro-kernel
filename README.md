@@ -1,4 +1,4 @@
-# pearl-kernel-cve-2026-43499
+# redmi-note-12t-pro-kernel-cve-2026-43499
 
 Redmi Note 12T Pro（codename `pearl`，MediaTek MT6895/MT6896）在 MIUI 14 / `V14.0.5.0.TLHCNXM` 上使用的官方 5.10.136 内核缺少 **CVE-2026-43499** 修复，可能导致随机 `kernel panic`、黑屏/冷复位，典型崩溃栈为 `futex_requeue → put_pi_state`。
 
@@ -9,6 +9,19 @@ Redmi Note 12T Pro（codename `pearl`，MediaTek MT6895/MT6896）在 MIUI 14 / `
 - 内核修复检测工具（`tools/check_kernel.sh` + `ghostlock-extract`）
 - vendor 模块 CRC 批量校验脚本
 - 脱敏后的重启案例与排查方法
+
+
+## 命名说明（为什么仓库名用市场机型名）
+
+`pearl` 是 Redmi Note 12T Pro 的**内部 codename**，只有刷机/内核玩家熟悉；
+普通用户看到 `pearl` 并不知道对应哪台手机。因此：
+
+- **仓库名**使用市场名 + CVE：`redmi-note-12t-pro-kernel-cve-2026-43499`；
+- **描述与 README**同时写明 `pearl`，方便已经知道 codename 的用户检索；
+- **Topics** 同时包含 `redmi-note-12t-pro` 与 `pearl`。
+
+GitHub 的搜索会同时匹配仓库名、描述、Topics 和 README；把市场名放在仓库名
+里，普通用户搜索“Redmi Note 12T Pro”时最容易命中。
 
 > **English summary:** CVE-2026-43499 fix for the Redmi Note 12T Pro (`pearl`) running the official MIUI 14 / 5.10.136 kernel. This repo contains the upstream 5.10.260 backport patches, a build/pack/verify/flash guide, detection tools, and a sanitized crash case study.
 
@@ -132,7 +145,7 @@ tools/check_kernel.sh /path/to/boot.img
 
 ## English
 
-**pearl-kernel-cve-2026-43499** provides the upstream 5.10.260 backport for CVE-2026-43499 on the Redmi Note 12T Pro (`pearl`, MT6895) running the official MIUI 14 / 5.10.136 kernel.
+**redmi-note-12t-pro-kernel-cve-2026-43499** provides the upstream 5.10.260 backport for CVE-2026-43499 on the Redmi Note 12T Pro (`pearl`, MT6895) running the official MIUI 14 / 5.10.136 kernel.
 
 The stock kernel's `remove_waiter()` uses `current` instead of `waiter->task`, leaving a dangling `pi_blocked_on` pointer (UAF) in the PI-futex requeue path. Symptoms include `futex_requeue → put_pi_state` kernel panics, silent hangs/cold resets, and random crashes in unrelated subsystems.
 
