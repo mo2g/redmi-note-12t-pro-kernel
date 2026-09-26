@@ -2,6 +2,8 @@
 
 **English** | [简体中文](README.zh-CN.md)
 
+[Latest release](https://github.com/mo2g/redmi-note-12t-pro-kernel/releases/latest) · [Release workflow](https://github.com/mo2g/redmi-note-12t-pro-kernel/actions/workflows/release.yml)
+
 Unofficial kernel patches, security fixes, and tooling for the **Redmi Note 12T Pro** (codename `pearl`, MediaTek MT6895/MT6896).
 
 Current focus: **CVE-2026-43499** in the official MIUI 14 / 5.10.136 kernel.
@@ -118,7 +120,9 @@ The repository includes [`.github/workflows/release.yml`](.github/workflows/rele
   - `SHA256SUMS`
 - **Important**: the automated release does **not** include a ready-to-flash `boot.img`. A boot image also contains a ROM- and Magisk-specific ramdisk. Download the kernel assets and repack them into **your own** boot backup using [`scripts/pack-boot.sh`](scripts/pack-boot.sh). See [`docs/release-process.md`](docs/release-process.md).
 
-Trigger the first release:
+First release: [v1.0.0-cve-2026-43499](https://github.com/mo2g/redmi-note-12t-pro-kernel/releases/tag/v1.0.0-cve-2026-43499)
+
+Trigger a new release:
 
 ```bash
 git tag v1.0.0-cve-2026-43499

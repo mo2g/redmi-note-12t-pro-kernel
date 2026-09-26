@@ -2,6 +2,8 @@
 
 [English](README.md) | **简体中文**
 
+[最新 Release](https://github.com/mo2g/redmi-note-12t-pro-kernel/releases/latest) · [Release workflow](https://github.com/mo2g/redmi-note-12t-pro-kernel/actions/workflows/release.yml)
+
 Redmi Note 12T Pro（codename `pearl`，MediaTek MT6895/MT6896）**非官方内核补丁、安全修复与工具集**。当前重点是修复官方 MIUI 14 / 5.10.136 内核的 **CVE-2026-43499**；后续可以继续追加该机型的其它内核 CVE、补丁、配置以及构建/验证工具。
 
 > **免责声明**：本项目与小米/Redmi 官方无关。刷入内核有风险；仅适用于 `pearl` 机型 + 匹配的 ROM/内核版本。刷入前必须备份 boot 分区，风险自负。
@@ -119,7 +121,9 @@ tools/check_kernel.sh /path/to/boot.img
   - `SHA256SUMS`
 - **重要**：自动 Release **不包含可直接 fastboot 刷入的 boot.img**。boot 镜像还包含与 ROM/Magisk 相关的 ramdisk；请用你自己的 boot 备份 + [`scripts/pack-boot.sh`](scripts/pack-boot.sh) 打包。详见 [`docs/release-process.md`](docs/release-process.md)。
 
-触发第一个 Release：
+首个 Release：[v1.0.0-cve-2026-43499](https://github.com/mo2g/redmi-note-12t-pro-kernel/releases/tag/v1.0.0-cve-2026-43499)
+
+触发新 Release：
 
 ```bash
 git tag v1.0.0-cve-2026-43499

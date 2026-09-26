@@ -12,6 +12,7 @@
   `module-crc-check.py`.
 - Add sanitized reboot case study.
 - Add bilingual README: `README.md` (English, default) and `README.zh-CN.md` (Chinese).
+- First automated release published: [v1.0.0-cve-2026-43499](https://github.com/mo2g/redmi-note-12t-pro-kernel/releases/tag/v1.0.0-cve-2026-43499)
 - Add tag-triggered GitHub Actions release workflow (`.github/workflows/release.yml`)
   that publishes kernel-only assets (`Image`, `Image.gz`, `Module.symvers`, config,
   build info, SHA256SUMS). Ready-to-flash `boot.img` is intentionally not published.
