@@ -17,6 +17,7 @@ REPO_DIR=$(cd "$SCRIPT_DIR/.." && pwd)
 KCONFIG=${2:-"$REPO_DIR/configs/device_kconfig.txt"}
 OUT=${OUT:-"$SRC/out"}
 JOBS=${JOBS:-$(nproc 2>/dev/null || echo 4)}
+TARGET=${TARGET:-Image.gz}
 THIN_LTO=${THIN_LTO:-1}
 LOCALVERSION=${LOCALVERSION:--pearl-cve43499}
 
@@ -66,8 +67,12 @@ if [ "$THIN_LTO" = "1" ]; then
 fi
 
 make -C "$SRC" O="$OUT" ARCH=arm64 LLVM=1 LLVM_IAS=1 olddefconfig
-make -C "$SRC" O="$OUT" ARCH=arm64 LLVM=1 LLVM_IAS=1 -j"$JOBS"
+if [ -n "$TARGET" ]; then
+  make -C "$SRC" O="$OUT" ARCH=arm64 LLVM=1 LLVM_IAS=1 -j"$JOBS" "$TARGET"
+else
+  make -C "$SRC" O="$OUT" ARCH=arm64 LLVM=1 LLVM_IAS=1 -j"$JOBS"
+fi
 
 echo
-echo "built: $OUT/arch/arm64/boot/Image"
+echo "built: $OUT/arch/arm64/boot/Image (and Image.gz when TARGET=Image.gz)"
 echo "verify: $REPO_DIR/tools/check_kernel.sh $OUT/arch/arm64/boot/Image"

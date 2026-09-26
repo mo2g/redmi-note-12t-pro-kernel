@@ -26,41 +26,70 @@ du -ah . | sort -h | tail -n 20
 
 `.gitignore` 已默认忽略这些内容，但仍建议发布前人工确认 `git status`。
 
-## 如果要发布预编译 boot 镜像
+## 自动 Release（推荐）
 
-建议使用 **GitHub Releases**，不要提交进 git：
+仓库包含 `.github/workflows/release.yml`，推送 `v*` 标签会自动构建并发布：
 
-- 资产：`new-boot.img`（或 `Image.gz`）
-- 必备说明：
-  - 适用机型/ROM/内核版本：`pearl` / `V14.0.5.0.TLHCNXM` / 5.10.136
-  - 内核版本串：`5.10.136-pearl-cve43499`
-  - 源码提交 `d96c1a04...` + 本仓库两个补丁
-  - 构建工具链、构建日期、是否 ThinLTO/FULL LTO
-  - SHA256
-  - 已知限制与风险：仅适用于匹配的 ROM/分区布局；刷机有风险；需解锁 BL；
-    需自行备份 boot 分区
-- 合规：如包含 Magisk ramdisk，请遵守 Magisk GPL-3.0 并附源码链接；
-  内核补丁/源码为 GPL-2.0。
+```bash
+git tag v1.0.0-cve-2026-43499
+git push origin v1.0.0-cve-2026-43499
+```
+
+自动 Release 的资产是 **kernel-only**：
+
+- `...-Image.gz`
+- `...-Image`
+- `...-Module.symvers`
+- `...-device_kconfig.patched`
+- `build-info.txt`
+- `SHA256SUMS`
+
+**不自动发布 `boot.img`**。boot 镜像包含与 ROM/Magisk 相关的 ramdisk，用户应
+使用自己的 boot 备份 + `scripts/pack-boot.sh` 打包，详见 `docs/release-process.md`。
+
+本地手动准备资产（CI 不可用时）：
+
+```bash
+scripts/prepare-release-assets.sh   --tag v1.0.0-cve-2026-43499   --image out/arch/arm64/boot/Image   --image-gz out/arch/arm64/boot/Image.gz   --symvers out/Module.symvers   --kconfig configs/device_kconfig.txt   --out dist
+
+gh release create v1.0.0-cve-2026-43499 dist/* \
+  --title "redmi-note-12t-pro-kernel v1.0.0-cve-2026-43499" \
+  --notes-file dist/release-notes.md
+```
+
+## 手动发布 boot 镜像（高级，不推荐）
+
+只有在明确知道 ROM/Magisk 版本、且愿意承担误刷风险时才这样做：
+
+- 只针对一个精确 ROM 版本（例如 `V14.0.5.0.TLHCNXM`）发布；
+- 明确标注是否包含 Magisk ramdisk；
+- 附 SHA256、适用机型、回滚方法；
+- 遵守 Magisk GPL-3.0 与内核 GPL-2.0 的许可要求；
+- 提醒用户：其他 ROM/版本不要刷，误刷需自行回滚。
 
 ## GitHub About 建议
 
 - 名称：`redmi-note-12t-pro-kernel`
-- 描述（中文）：
+- Description（English，默认）：
+  `Unofficial kernel patches, security fixes, and tools for the Redmi Note 12T Pro (pearl); currently includes the CVE-2026-43499 fix.`
+- 中文描述（备用）：
   `Redmi Note 12T Pro (pearl) 非官方内核补丁/安全修复与工具集；当前包含 CVE-2026-43499。`
-- Description (English):
-  `Unofficial kernel patches, security fixes, and tools for Redmi Note 12T Pro (pearl); currently includes CVE-2026-43499.`
 - Topics：
   `redmi-note-12t-pro`, `pearl`, `mt6895`, `mediatek`, `miui`,
   `android-kernel`, `kernel-patches`, `kernel-security`, `cve-2026-43499`,
   `rtmutex`, `futex`
 
-## 推荐初始化命令
+## 推送到已创建的 GitHub 仓库
 
 ```bash
 cd redmi-note-12t-pro-kernel
-git init -b main
-git add .
-git commit -m "Initial release: CVE-2026-43499 fix for Redmi Note 12T Pro (pearl)"
-# 创建 GitHub 仓库（需已安装并登录 gh）
-gh repo create redmi-note-12t-pro-kernel --public --source=. --remote=origin --push
+git remote add origin https://github.com/mo2g/redmi-note-12t-pro-kernel.git
+git push -u origin main
+```
+
+如果没有配置 HTTPS 凭据，可以使用 SSH：
+
+```bash
+git remote set-url origin git@github.com:mo2g/redmi-note-12t-pro-kernel.git
+git push -u origin main
 ```

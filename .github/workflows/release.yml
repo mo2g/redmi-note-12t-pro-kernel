@@ -1,0 +1,115 @@
+name: release
+
+# Tag-triggered release build:
+#   git tag v1.0.0-cve-2026-43499
+#   git push origin v1.0.0-cve-2026-43499
+#
+# Publishes kernel-only assets (Image/Image.gz, Module.symvers, config,
+# build-info, SHA256SUMS). It intentionally does NOT publish a ready-to-flash
+# boot.img, because a boot image contains a ROM/Magisk-specific ramdisk.
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Free disk space
+        run: |
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL || true
+          df -h
+
+      - name: Install toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            software-properties-common clang-12 lld-12 llvm-12 make bc bison \
+            flex libssl-dev libelf-dev python3 python3-distutils python-is-python3 \
+            xz-utils cpio tar kmod curl git file binutils
+          mkdir -p "$HOME/llvm12/bin"
+          for t in clang clang++ ld.lld llvm-ar llvm-nm llvm-objcopy \
+                   llvm-objdump llvm-readelf llvm-size llvm-strip llvm-ranlib; do
+            src=$(command -v "${t}-12")
+            ln -sf "$src" "$HOME/llvm12/bin/$t"
+          done
+          echo "$HOME/llvm12/bin" >> "$GITHUB_PATH"
+          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+
+      - name: Download official Xiaomi source
+        run: |
+          curl -L --retry 3 -o /tmp/pearl-s-oss.tar.gz \
+            https://codeload.github.com/MiCode/Xiaomi_Kernel_OpenSource/tar.gz/d96c1a04b701bcf1d39ed1b8ab4b3137ff6490f9
+          mkdir -p /tmp/pearl-src
+          tar -xzf /tmp/pearl-s-oss.tar.gz -C /tmp/pearl-src
+          SRC=$(find /tmp/pearl-src -maxdepth 1 -mindepth 1 -type d | head -n1)
+          mv "$SRC" /tmp/pearl-kernel
+          grep -E '^(VERSION|PATCHLEVEL|SUBLEVEL)' /tmp/pearl-kernel/Makefile
+
+      - name: Build kernel (ThinLTO + CFI)
+        run: |
+          THIN_LTO=1 TARGET=Image.gz JOBS="$(nproc)" OUT=/tmp/pearl-kernel/out \
+            scripts/build-kernel.sh /tmp/pearl-kernel configs/device_kconfig.txt
+
+      - name: Verify patched source
+        run: |
+          grep -q 'waiter_task = waiter->task' /tmp/pearl-kernel/kernel/locking/rtmutex.c
+          ! awk '/static void remove_waiter/,/^}/' /tmp/pearl-kernel/kernel/locking/rtmutex.c | grep -q current
+
+      - name: Build and run upstream GhostLock detector (Linux)
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal --default-toolchain stable
+          source "$HOME/.cargo/env"
+          git init /tmp/ghostlock-app
+          cd /tmp/ghostlock-app
+          git fetch --depth 1 https://github.com/YuKongA/ghostlock-app.git \
+            3bd95d37e4874821d4143fc7f0fbd85fc2348ee3
+          git checkout --detach FETCH_HEAD
+          cargo build --release --manifest-path tools/extract_rs/Cargo.toml --ignore-rust-version
+          set +e
+          OUT=$(tools/extract_rs/target/release/ghostlock-extract \
+            /tmp/pearl-kernel/out/arch/arm64/boot/Image 2>&1)
+          RC=$?
+          set -e
+          echo "$OUT"
+          if [ "$RC" -ne 6 ] && ! echo "$OUT" | grep -q 'rtmutex UAF fix is present'; then
+            echo "error: detector did not confirm the fix"
+            exit 1
+          fi
+
+      - name: Prepare release assets
+        run: |
+          scripts/prepare-release-assets.sh \
+            --tag "${GITHUB_REF_NAME}" \
+            --image /tmp/pearl-kernel/out/arch/arm64/boot/Image \
+            --image-gz /tmp/pearl-kernel/out/arch/arm64/boot/Image.gz \
+            --symvers /tmp/pearl-kernel/out/Module.symvers \
+            --kconfig configs/device_kconfig.txt \
+            --out dist
+
+      - name: Upload workflow artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: redmi-note-12t-pro-kernel-${{ github.ref_name }}
+          path: dist/*
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" dist/* \
+            --title "redmi-note-12t-pro-kernel ${GITHUB_REF_NAME}" \
+            --notes-file dist/release-notes.md \
+            --verify-tag

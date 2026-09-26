@@ -88,3 +88,10 @@ CVE-2026-43499 修复后，如果仍出现 `kernel_panic`，那属于另一个�
 - `adb shell getprop ro.boot.bootreason`、`persist.sys.boot.reason.history`
 
 提交 issue 时请先删除序列号、IMEI、手机号、个人应用列表等敏感信息。
+
+## Release 资产注意
+
+GitHub Release 里的 `Image` / `Image.gz` 是**内核镜像**，不是完整的
+`boot.img`，不能直接刷入 boot 分区。必须先用自己的 boot 备份 +
+`scripts/pack-boot.sh` 打包成新的 boot 镜像，再执行 `check_kernel.sh` 验证后
+才能刷入。原因和流程见 [`release-process.md`](release-process.md)。

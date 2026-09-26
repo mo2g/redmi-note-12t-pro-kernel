@@ -156,3 +156,13 @@ magiskboot cpio ramdisk.cpio ls | grep -E 'overlay.d|\.backup'
 - 确认 `boot_a` / `boot_b` 中要刷的分区与原备份一致，并已保存备份
 
 刷入与回滚见 `docs/rollback.md`。刷入后按 `docs/verification.md` 做功能自检。
+
+## Release / CI build
+
+`scripts/build-kernel.sh` 默认只构建 `Image.gz`（`TARGET=Image.gz`），这样在 CI
+里可以避免构建全部 in-tree 模块，节省时间和磁盘。`Image.gz` 目标的依赖
+`vmlinux` 会同时生成 `Module.symvers`，用于 vendor 模块 CRC 校验。
+
+- 只做 Release / 内核镜像：无需额外设置（默认）。
+- 需要全部内置模块：`TARGET= make ...` 或 `TARGET=all`。
+- 自动 Release 的完整流程见 [`release-process.md`](release-process.md)。

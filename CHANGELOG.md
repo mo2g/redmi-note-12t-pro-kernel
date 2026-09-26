@@ -11,5 +11,11 @@
 - Add `check_kernel.sh`, `ghostlock-extract` convenience binary, and
   `module-crc-check.py`.
 - Add sanitized reboot case study.
+- Add bilingual README: `README.md` (English, default) and `README.zh-CN.md` (Chinese).
+- Add tag-triggered GitHub Actions release workflow (`.github/workflows/release.yml`)
+  that publishes kernel-only assets (`Image`, `Image.gz`, `Module.symvers`, config,
+  build info, SHA256SUMS). Ready-to-flash `boot.img` is intentionally not published.
 
-> Repository naming: `redmi-note-12t-pro-kernel` is intentionally broad so future kernel patches, security fixes, and tools can be added under the same repository. CVE-specific details live in `docs/`, `CHANGELOG.md`, topics, and GitHub Releases.
+> Repository naming: `redmi-note-12t-pro-kernel` is intentionally broad so future
+> kernel patches, security fixes, and tools can be added under the same repository.
+> CVE-specific details live in the README, `CHANGELOG.md`, topics, and GitHub Releases.
